@@ -109,7 +109,7 @@ export default function MockTestPage() {
     createClient().auth.getUser().then(({ data }) => {
       if (data.user) {
         saveMockTestResult(data.user.id, {
-          score, total, passed, timeTaken,
+          score, total, passed, timeTakenSeconds: timeTaken,
           answers: answers.map(a => ({
             questionId: a.questionId,
             selected: a.selected,
