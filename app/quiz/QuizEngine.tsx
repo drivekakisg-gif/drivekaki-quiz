@@ -10,6 +10,7 @@ import { upsertTopicMastery } from "@/lib/topicMastery"
 import { saveAttempts } from "@/lib/saveAttempts"
 import { sounds } from "@/lib/sounds"
 import { calcXPGain, xpLabel } from "@/lib/xp"
+import { getRandomFact } from "@/lib/funFacts"
 import { createClient } from "@/lib/supabase"
 import type { BttQuestion, QuizAttempt } from "@/types"
 
@@ -57,6 +58,7 @@ export default function QuizEngine() {
   const [showLevelUp, setShowLevelUp]     = useState(false)
   const [levelUpTier, setLevelUpTier]     = useState<LevelTier | null>(null)
   const [screenFlash, setScreenFlash]     = useState(false)
+  const [funFact, setFunFact]             = useState("")
 
   const { floats, spawnFloat, expireFloat } = useXPFloats()
 
@@ -135,11 +137,8 @@ export default function QuizEngine() {
       game.resetStreak()
       setSessionWrong(prev => prev + 1)
       setMascotMood("sad")
+      setFunFact(getRandomFact())
       setTimeout(() => setMascotMood("neutral"), 1500)
-
-      if (game.hearts - 1 <= 0) {
-        // Will show session_over after continue
-      }
     }
 
     setAttempts(prev => [...prev, {
@@ -310,16 +309,24 @@ export default function QuizEngine() {
 
         {/* Explanation */}
         {revealed && (
-          <div className={`rounded-2xl p-4 mb-4 border text-sm leading-relaxed ${
-            selected === currentQ.correct
-              ? "bg-green-50 border-green-200 text-green-800"
-              : "bg-blue-50 border-blue-200 text-blue-800"
-          }`}>
-            <p className="font-semibold mb-1">
-              {selected === currentQ.correct ? "✓ Correct!" : `✗ Correct answer: ${currentQ.correct}`}
-            </p>
-            <p>{currentQ.explanation}</p>
-          </div>
+          <>
+            <div className={`rounded-2xl p-4 mb-3 border text-sm leading-relaxed ${
+              selected === currentQ.correct
+                ? "bg-green-50 border-green-200 text-green-800"
+                : "bg-blue-50 border-blue-200 text-blue-800"
+            }`}>
+              <p className="font-semibold mb-1">
+                {selected === currentQ.correct ? "✓ Correct!" : `✗ Correct answer: ${currentQ.correct}`}
+              </p>
+              <p>{currentQ.explanation}</p>
+            </div>
+            {selected !== currentQ.correct && funFact && (
+              <div className="rounded-2xl p-4 mb-3 bg-amber-50 border border-amber-200 text-sm text-amber-800 leading-relaxed">
+                <p className="font-semibold mb-1">💡 Did you know?</p>
+                <p>{funFact}</p>
+              </div>
+            )}
+          </>
         )}
 
         {/* Continue button */}
