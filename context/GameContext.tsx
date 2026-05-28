@@ -29,11 +29,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
     totalXP: 0, streak: 0, longestStreak: 0, lastPractice: null,
     hearts: 5, heartRefillTime: null, totalSessions: 0, totalCorrect: 0, totalWrong: 0,
   }))
-  const [mounted, setMounted] = useState(false)
-
   useEffect(() => {
     setState(loadGameState())
-    setMounted(true)
   }, [])
 
   const tierInfo = getLevelInfo(state.totalXP)
@@ -105,8 +102,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const refreshFromStorage = useCallback(() => {
     setState(loadGameState())
   }, [])
-
-  if (!mounted) return null
 
   return (
     <GameContext.Provider value={{
