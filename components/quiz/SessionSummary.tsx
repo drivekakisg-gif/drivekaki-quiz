@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import confetti from "canvas-confetti"
 import Mascot from "@/components/Mascot"
+import ScoreCard from "@/components/ScoreCard"
 import { useGame } from "@/context/GameContext"
 import { predictBTTReadyDays } from "@/lib/xp"
 import type { BttQuestion, QuizAttempt } from "@/types"
@@ -66,6 +67,17 @@ export default function SessionSummary({
   const wrongQuestions = wrongAttempts
     .map(a => questions.find(q => q.id === a.questionId))
     .filter(Boolean) as BttQuestion[]
+
+  // Topic stats for ScoreCard
+  const topicMap: Record<string, { correct: number; total: number }> = {}
+  for (const a of attempts) {
+    const q = questions.find(q => q.id === a.questionId)
+    if (!q) continue
+    if (!topicMap[q.topic]) topicMap[q.topic] = { correct: 0, total: 0 }
+    topicMap[q.topic].total++
+    if (a.correct) topicMap[q.topic].correct++
+  }
+  const topicStats = Object.entries(topicMap).map(([topic, s]) => ({ topic, ...s }))
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
@@ -134,6 +146,14 @@ export default function SessionSummary({
           </div>
         </div>
       )}
+
+      {/* Share score card */}
+      <ScoreCard
+        score={sessionCorrect}
+        total={sessionCorrect + sessionWrong}
+        sessionXP={sessionXP}
+        topicStats={topicStats}
+      />
 
       {/* Actions */}
       <div className="flex flex-col gap-3 pb-8">

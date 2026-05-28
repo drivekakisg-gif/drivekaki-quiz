@@ -11,6 +11,7 @@ import { saveAttempts } from "@/lib/saveAttempts"
 import { sounds } from "@/lib/sounds"
 import { calcXPGain, xpLabel } from "@/lib/xp"
 import { getRandomFact } from "@/lib/funFacts"
+import { upsertLeaderboard } from "@/lib/leaderboard"
 import { createClient } from "@/lib/supabase"
 import type { BttQuestion, QuizAttempt } from "@/types"
 
@@ -22,6 +23,7 @@ import LevelUpModal from "@/components/quiz/LevelUpModal"
 import SessionOver from "@/components/quiz/SessionOver"
 import SessionSummary from "@/components/quiz/SessionSummary"
 import Mascot from "@/components/Mascot"
+import ReportButton from "@/components/ReportButton"
 import type { MascotMood } from "@/components/Mascot"
 import type { LevelTier } from "@/lib/xp"
 
@@ -181,6 +183,8 @@ export default function QuizEngine() {
     const srInput = attempts.map(a => ({ questionId: a.questionId, correct: a.correct }))
     upsertSRCards(srInput).catch(console.error)
 
+    upsertLeaderboard(sessionXP, correct).catch(console.error)
+
     const topicInput = attempts.map(a => {
       const q = questions.find(q => q.id === a.questionId)
       return q ? { topic: q.topic, correct: a.correct } : null
@@ -281,7 +285,8 @@ export default function QuizEngine() {
           }`}>
             {currentQ.difficulty}
           </span>
-          <span className="ml-auto">
+          <span className="ml-auto flex items-center gap-3">
+            <ReportButton questionId={currentQ.id} />
             <Mascot mood={mascotMood} size={36} />
           </span>
         </div>

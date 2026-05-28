@@ -2,21 +2,33 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { useGame } from "@/context/GameContext"
 import { loadLastMockScore } from "@/lib/saveMockTest"
 import { getDueCount } from "@/lib/spacedRepetition"
 import { getTopicMastery, type TopicMasteryRow } from "@/lib/topicMastery"
 import { getTodaysAttempt, getOrCreateDailyChallenge, challengeDayNumber, todayISO } from "@/lib/dailyChallenge"
+import { getFreezesOwned, hasUsedFreeWeeklyFreeze, claimFreeWeeklyFreeze, buyFreeze } from "@/lib/streakFreeze"
+
+const ONBOARDING_KEY = "dk_onboarding_done"
 
 export default function HomePage() {
-  const { streak, totalXP, tierInfo, hearts } = useGame()
+  const router = useRouter()
+  const { streak, totalXP, tierInfo, hearts, refreshFromStorage } = useGame()
   const [lastMock, setLastMock]     = useState<{ score: number; total: number } | null>(null)
   const [dueCount, setDueCount]     = useState(0)
   const [dailyDone, setDailyDone]   = useState<boolean | null>(null)
+  const [freezes, setFreezes]       = useState(0)
+  const [freeAvailable, setFreeAvailable] = useState(false)
   const [dayNum, setDayNum]         = useState(1)
   const [weakTopics, setWeakTopics] = useState<TopicMasteryRow[]>([])
 
   useEffect(() => {
+    // Redirect first-time users to onboarding
+    if (!localStorage.getItem(ONBOARDING_KEY)) {
+      router.replace("/onboarding")
+      return
+    }
     setLastMock(loadLastMockScore())
     getDueCount().then(setDueCount)
     getTopicMastery().then((rows) => {
@@ -28,7 +40,9 @@ export default function HomePage() {
       const attempt = await getTodaysAttempt(ch.challenge_date)
       setDailyDone(!!attempt)
     }).catch(() => setDailyDone(false))
-  }, [])
+    setFreezes(getFreezesOwned())
+    setFreeAvailable(!hasUsedFreeWeeklyFreeze())
+  }, [router])
 
   const today = todayISO()
 
@@ -65,6 +79,44 @@ export default function HomePage() {
           </div>
           <div className="text-[10px] text-gray-400 font-medium">Hearts</div>
         </div>
+      </div>
+
+      {/* Streak Freeze + Leaderboard row */}
+      <div className="flex gap-3 mb-3">
+        {/* Streak Freeze */}
+        <div className="flex-1 bg-white rounded-2xl border border-gray-100 p-3 flex items-center gap-2">
+          <span className="text-xl">🛡️</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-bold text-gray-700">Streak Freeze</p>
+            <p className="text-xs text-gray-400">{freezes} owned</p>
+          </div>
+          {freeAvailable ? (
+            <button
+              onClick={() => { claimFreeWeeklyFreeze(); setFreezes(getFreezesOwned()); setFreeAvailable(false) }}
+              className="text-xs bg-blue-500 text-white font-bold px-2 py-1 rounded-lg"
+            >
+              Free!
+            </button>
+          ) : totalXP >= 200 ? (
+            <button
+              onClick={() => { const r = buyFreeze(totalXP); if (r.success) { refreshFromStorage(); setFreezes(getFreezesOwned()) } }}
+              className="text-xs bg-gray-100 text-gray-600 font-bold px-2 py-1 rounded-lg"
+            >
+              200 XP
+            </button>
+          ) : (
+            <span className="text-xs text-gray-300">200 XP</span>
+          )}
+        </div>
+        {/* Leaderboard shortcut */}
+        <Link href="/leaderboard" className="flex-1 bg-white rounded-2xl border border-gray-100 p-3 flex items-center gap-2">
+          <span className="text-xl">🏆</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-bold text-gray-700">Leaderboard</p>
+            <p className="text-xs text-gray-400">Weekly XP race</p>
+          </div>
+          <span className="text-gray-300">›</span>
+        </Link>
       </div>
 
       {/* Daily Challenge card */}

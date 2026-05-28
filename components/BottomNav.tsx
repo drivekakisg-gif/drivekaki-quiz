@@ -4,11 +4,11 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 const NAV = [
-  { href: "/",        icon: "🏠", label: "Home"     },
-  { href: "/quiz",    icon: "🎮", label: "Practice" },
-  { href: "/daily",   icon: "📅", label: "Daily"    },
-  { href: "/topics",  icon: "🗺️", label: "Topics"   },
-  { href: "/auth",    icon: "👤", label: "Profile"  },
+  { href: "/",            icon: "🏠", label: "Home"    },
+  { href: "/quiz",        icon: "🎮", label: "Quiz"    },
+  { href: "/daily",       icon: "📅", label: "Daily"   },
+  { href: "/topics",      icon: "🗺️", label: "Topics"  },
+  { href: "/leaderboard", icon: "🏆", label: "Ranks"   },
 ]
 
 export default function BottomNav() {
