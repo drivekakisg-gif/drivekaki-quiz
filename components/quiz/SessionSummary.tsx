@@ -5,6 +5,7 @@ import Link from "next/link"
 import confetti from "canvas-confetti"
 import Mascot from "@/components/Mascot"
 import ScoreCard from "@/components/ScoreCard"
+import CoachModal from "@/components/CoachModal"
 import { useGame } from "@/context/GameContext"
 import { predictBTTReadyDays } from "@/lib/xp"
 import type { BttQuestion, QuizAttempt } from "@/types"
@@ -43,6 +44,10 @@ export default function SessionSummary({
   const accuracy = total > 0 ? Math.round((sessionCorrect / total) * 100) : 0
   const isPerfect = sessionWrong === 0
   const passed = accuracy >= 90
+
+  // Unique session ID for CoachModal dedup
+  const sessionId = useRef(`session-${Date.now()}`).current
+  const [showCoach, setShowCoach] = useState(true)
 
   const displayXP  = useCountUp(sessionXP)
   const displayAcc = useCountUp(accuracy)
@@ -170,6 +175,14 @@ export default function SessionSummary({
           Home
         </Link>
       </div>
+
+      {showCoach && (
+        <CoachModal
+          sessionId={sessionId}
+          sessionAttempts={attempts.map(a => ({ questionId: a.questionId, correct: a.correct }))}
+          onDismiss={() => setShowCoach(false)}
+        />
+      )}
     </div>
   )
 }
