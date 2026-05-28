@@ -1,9 +1,12 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import confetti from "canvas-confetti"
 import { useGame } from "@/context/GameContext"
 import { fetchQuestions } from "@/lib/questions"
+import { upsertSRCards } from "@/lib/spacedRepetition"
+import { upsertTopicMastery } from "@/lib/topicMastery"
 import { saveAttempts } from "@/lib/saveAttempts"
 import { sounds } from "@/lib/sounds"
 import { calcXPGain, xpLabel } from "@/lib/xp"
@@ -27,6 +30,8 @@ const LETTERS = ["A","B","C","D"]
 
 export default function QuizEngine() {
   const game = useGame()
+  const searchParams = useSearchParams()
+  const topicFilter = searchParams.get("topic")
 
   // Questions
   const [questions, setQuestions]   = useState<BttQuestion[]>([])
@@ -64,7 +69,8 @@ export default function QuizEngine() {
     }
     fetchQuestions()
       .then(qs => {
-        setQuestions([...qs].sort(() => Math.random() - 0.5))
+        const filtered = topicFilter ? qs.filter(q => q.topic === topicFilter) : qs
+        setQuestions([...filtered].sort(() => Math.random() - 0.5))
         setPhase("quiz")
         questionStart.current = Date.now()
       })
@@ -171,6 +177,16 @@ export default function QuizEngine() {
     createClient().auth.getUser().then(({ data }) => {
       if (data.user) saveAttempts(data.user.id, attempts).catch(console.error)
     })
+
+    // Spaced repetition + topic mastery (fire-and-forget, no auth required to enqueue)
+    const srInput = attempts.map(a => ({ questionId: a.questionId, correct: a.correct }))
+    upsertSRCards(srInput).catch(console.error)
+
+    const topicInput = attempts.map(a => {
+      const q = questions.find(q => q.id === a.questionId)
+      return q ? { topic: q.topic, correct: a.correct } : null
+    }).filter(Boolean) as { topic: string; correct: boolean }[]
+    upsertTopicMastery(topicInput).catch(console.error)
 
     setPhase(heartDepleted ? "session_over" : "summary")
   }
