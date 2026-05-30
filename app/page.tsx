@@ -9,6 +9,7 @@ import { getDueCount } from "@/lib/spacedRepetition"
 import { getTopicMastery, type TopicMasteryRow } from "@/lib/topicMastery"
 import { getTodaysAttempt, getOrCreateDailyChallenge, challengeDayNumber, todayISO } from "@/lib/dailyChallenge"
 import { getFreezesOwned, hasUsedFreeWeeklyFreeze, claimFreeWeeklyFreeze, buyFreeze } from "@/lib/streakFreeze"
+import { FIRST_TIME_PASS_RATES, WAITING_TIMES_LATEST, waitColor, monthsToWeeks } from "@/lib/benchmarks"
 
 const ONBOARDING_KEY = "dk_onboarding_done"
 
@@ -219,11 +220,30 @@ export default function HomePage() {
         </>
       )}
 
-      {/* BTT pass bar */}
-      <div className="bg-green-50 border border-green-200 rounded-2xl p-4 text-center">
-        <p className="text-green-800 font-bold text-sm">🎯 Pass mark: 45/50 (90%)</p>
-        <p className="text-green-600 text-xs mt-0.5">Practice daily to keep your streak alive</p>
+      {/* BTT readiness context */}
+      <div className="bg-green-50 border border-green-200 rounded-2xl p-4 mb-3">
+        <p className="text-green-800 font-bold text-sm">🎯 BTT pass mark: 45/50 (90%)</p>
+        <p className="text-green-600 text-xs mt-0.5">
+          BBDC has a <strong>93%</strong> first-time BTT pass rate. SSDC &amp; CDC: <strong>86%</strong>.
+          Consistent practice puts you in the majority.
+        </p>
       </div>
+
+      {/* Test Info card */}
+      <Link
+        href="/test-info"
+        className="flex items-center gap-4 p-4 rounded-2xl border-2 border-gray-200 bg-white hover:scale-[1.01] active:scale-[0.99] transition-transform mb-3"
+      >
+        <div className="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">📊</div>
+        <div className="flex-1 min-w-0">
+          <span className="font-black text-gray-900">Test Waiting Times &amp; Pass Rates</span>
+          <p className="text-sm text-gray-500 mt-0.5">
+            Class 3 at CDC: <span className="font-bold text-amber-600">~5 week wait</span> · Private avg: <span className="font-bold text-red-500">29%</span> pass
+          </p>
+          <p className="text-xs text-gray-400 mt-0.5">Official LTA data · Jan 2026</p>
+        </div>
+        <span className="text-gray-300 text-xl">›</span>
+      </Link>
     </div>
   )
 }
