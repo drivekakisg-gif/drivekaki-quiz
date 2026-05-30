@@ -24,7 +24,6 @@ export default function HomePage() {
   const [weakTopics, setWeakTopics] = useState<TopicMasteryRow[]>([])
 
   useEffect(() => {
-    // Redirect first-time users to onboarding
     if (!localStorage.getItem(ONBOARDING_KEY)) {
       router.replace("/onboarding")
       return
@@ -83,7 +82,6 @@ export default function HomePage() {
 
       {/* Streak Freeze + Leaderboard row */}
       <div className="flex gap-3 mb-3">
-        {/* Streak Freeze */}
         <div className="flex-1 bg-white rounded-2xl border border-gray-100 p-3 flex items-center gap-2">
           <span className="text-xl">🛡️</span>
           <div className="flex-1 min-w-0">
@@ -108,7 +106,6 @@ export default function HomePage() {
             <span className="text-xs text-gray-300">200 XP</span>
           )}
         </div>
-        {/* Leaderboard shortcut */}
         <Link href="/leaderboard" className="flex-1 bg-white rounded-2xl border border-gray-100 p-3 flex items-center gap-2">
           <span className="text-xl">🏆</span>
           <div className="flex-1 min-w-0">
@@ -156,7 +153,7 @@ export default function HomePage() {
         </Link>
       )}
 
-      {/* Mode cards */}
+      {/* Study modes */}
       <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3 mt-2">Study Modes</h2>
       <div className="grid grid-cols-1 gap-3 mb-5">
         {[
@@ -184,25 +181,42 @@ export default function HomePage() {
 
       {/* Weak topics preview */}
       {weakTopics.length > 0 && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-5">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-black text-gray-700">Weakest Topics</h2>
-            <Link href="/topics" className="text-xs text-green-600 font-semibold">View all →</Link>
+        <>
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-3">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-black text-gray-700">Weakest Topics</h2>
+              <Link href="/topics" className="text-xs text-green-600 font-semibold">View all →</Link>
+            </div>
+            <div className="space-y-3">
+              {weakTopics.map((t) => (
+                <Link key={t.topic} href={`/quiz?topic=${encodeURIComponent(t.topic)}`} className="block">
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="font-medium text-gray-700">{t.topic}</span>
+                    <span className={t.mastery_pct < 40 ? "text-red-500 font-bold" : "text-yellow-600 font-bold"}>{t.mastery_pct}%</span>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-1.5">
+                    <div className={`h-1.5 rounded-full ${t.mastery_pct < 40 ? "bg-red-400" : "bg-yellow-400"}`} style={{ width: `${t.mastery_pct}%` }} />
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
-          <div className="space-y-3">
-            {weakTopics.map((t) => (
-              <Link key={t.topic} href={`/quiz?topic=${encodeURIComponent(t.topic)}`} className="block">
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="font-medium text-gray-700">{t.topic}</span>
-                  <span className={t.mastery_pct < 40 ? "text-red-500 font-bold" : "text-yellow-600 font-bold"}>{t.mastery_pct}%</span>
-                </div>
-                <div className="w-full bg-gray-100 rounded-full h-1.5">
-                  <div className={`h-1.5 rounded-full ${t.mastery_pct < 40 ? "bg-red-400" : "bg-yellow-400"}`} style={{ width: `${t.mastery_pct}%` }} />
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
+
+          {/* Instructor suggestion — contextual, based on weakest topic */}
+          <Link
+            href={`/instructors?topic=${encodeURIComponent(weakTopics[0].topic)}`}
+            className="flex items-center gap-4 p-4 rounded-2xl border-2 border-green-200 bg-green-50 hover:scale-[1.01] active:scale-[0.99] transition-transform mb-5"
+          >
+            <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">👨‍🏫</div>
+            <div className="flex-1 min-w-0">
+              <span className="font-black text-gray-900">Connect with an Instructor</span>
+              <p className="text-sm text-gray-500 mt-0.5">
+                Want personalised help with <strong>{weakTopics[0].topic}</strong>? Connect with an experienced instructor who specialises in this.
+              </p>
+            </div>
+            <span className="text-gray-300 text-xl">›</span>
+          </Link>
+        </>
       )}
 
       {/* BTT pass bar */}
