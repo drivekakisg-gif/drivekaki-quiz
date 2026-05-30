@@ -23,7 +23,7 @@ export default function QuizCard({
 
   function optionClass(letter: string): string {
     const base =
-      "w-full text-left px-4 py-3 rounded-xl border-2 transition-all duration-150 flex items-start gap-3 text-sm";
+      "w-full text-left px-4 py-3 rounded-xl border-2 transition-colors duration-150 flex items-start gap-3 text-sm";
 
     if (!revealed) {
       if (selected === letter)
@@ -32,7 +32,7 @@ export default function QuizCard({
     }
 
     if (letter === question.correct)
-      return `${base} border-green-500 bg-green-100 font-semibold`;
+      return `${base} border-[#22c55e] bg-[#22c55e] text-white font-semibold`;
     if (selected === letter && letter !== question.correct)
       return `${base} border-red-400 bg-red-50`;
     return `${base} border-gray-200 bg-white opacity-50`;
@@ -46,7 +46,7 @@ export default function QuizCard({
       if (selected === letter) return `${base} bg-green-500 text-white`;
       return `${base} bg-gray-100 text-gray-600`;
     }
-    if (letter === question.correct) return `${base} bg-green-500 text-white`;
+    if (letter === question.correct) return `${base} bg-white text-green-600`;
     if (selected === letter) return `${base} bg-red-400 text-white`;
     return `${base} bg-gray-100 text-gray-400`;
   }
@@ -101,6 +101,9 @@ export default function QuizCard({
             >
               <span className={labelBadgeClass(letter)}>{letter}</span>
               <span className="leading-snug pt-0.5">{displayText(option)}</span>
+              {revealed && letter === question.correct && (
+                <span className="ml-auto flex-shrink-0 text-white text-lg">✓</span>
+              )}
             </button>
           );
         })}
